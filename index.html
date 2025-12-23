@@ -32,18 +32,10 @@
             </div>
             
             <div class="space-y-4">
-                <div class="relative">
-                    <input type="text" id="id" placeholder="아이디" class="w-full p-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-400 outline-none transition-all">
-                </div>
-                <div class="relative">
-                    <input type="password" id="pw" placeholder="비밀번호" class="w-full p-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-400 outline-none transition-all">
-                </div>
-                <button onclick="handleAuth()" id="mainBtn" class="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl transition-all transform active:scale-95 shadow-lg shadow-blue-200">
-                    로그인
-                </button>
-                <button onclick="toggleAuth()" id="subBtn" class="w-full py-4 text-blue-600 font-semibold hover:bg-blue-50 rounded-2xl transition-all">
-                    계정이 없으신가요? 회원가입
-                </button>
+                <input type="text" id="id" placeholder="아이디" class="w-full p-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-400 outline-none transition-all">
+                <input type="password" id="pw" placeholder="비밀번호" class="w-full p-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-400 outline-none transition-all">
+                <button onclick="handleAuth()" id="mainBtn" class="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl transition-all shadow-lg shadow-blue-200">로그인</button>
+                <button onclick="toggleAuth()" id="subBtn" class="w-full py-4 text-blue-600 font-semibold hover:bg-blue-50 rounded-2xl transition-all">계정이 없으신가요? 회원가입</button>
             </div>
         </div>
 
@@ -55,65 +47,46 @@
                 </div>
                 <div class="flex items-center gap-3">
                     <button onclick="showSettings()" class="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-full hover:bg-gray-200 transition">⚙️</button>
-                    <button onclick="logout()" class="text-xs font-bold text-red-500 bg-red-50 px-3 py-2 rounded-xl hover:bg-red-100">로그아웃</button>
+                    <button onclick="logout()" class="text-xs font-bold text-red-500 bg-red-50 px-3 py-2 rounded-xl">로그아웃</button>
                 </div>
             </div>
 
             <div id="chatSection" class="flex-1 flex flex-col overflow-hidden bg-slate-50">
-                <div id="chatBox" class="flex-1 p-6 overflow-y-auto space-y-4 flex flex-col">
-                    </div>
+                <div id="chatBox" class="flex-1 p-6 overflow-y-auto space-y-4 flex flex-col"></div>
                 <div class="p-4 bg-white flex gap-2 border-t">
-                    <input type="text" id="chatInput" placeholder="메시지를 입력하세요..." class="flex-1 p-3 bg-gray-100 border-none rounded-xl focus:ring-2 focus:ring-blue-400 outline-none transition" onkeypress="if(event.keyCode==13) sendChat()">
-                    <button onclick="sendChat()" class="bg-blue-600 text-white px-5 py-3 rounded-xl font-bold hover:bg-blue-700 transition">전송</button>
+                    <input type="text" id="chatInput" placeholder="메시지를 입력하세요..." class="flex-1 p-3 bg-gray-100 border-none rounded-xl outline-none" onkeypress="if(event.keyCode==13) sendChat()">
+                    <button onclick="sendChat()" class="bg-blue-600 text-white px-5 py-3 rounded-xl font-bold">전송</button>
                 </div>
             </div>
 
-            <div id="settingsSection" class="hidden p-8 flex-1 space-y-5 animate-fade-in">
+            <div id="settingsSection" class="hidden p-8 flex-1 space-y-5">
                 <h3 class="text-xl font-bold text-gray-800 mb-2">회원 정보 수정</h3>
-                <div class="space-y-4">
-                    <label class="block">
-                        <span class="text-sm font-medium text-gray-500 ml-1">새 아이디</span>
-                        <input type="text" id="newId" class="w-full mt-1 p-4 bg-gray-100 border-none rounded-2xl outline-none focus:ring-2 focus:ring-green-400">
-                    </label>
-                    <label class="block">
-                        <span class="text-sm font-medium text-gray-500 ml-1">새 비밀번호</span>
-                        <input type="password" id="newPw" class="w-full mt-1 p-4 bg-gray-100 border-none rounded-2xl outline-none focus:ring-2 focus:ring-green-400">
-                    </label>
-                    <button onclick="updateProfile()" class="w-full py-4 bg-green-600 text-white font-bold rounded-2xl shadow-lg shadow-green-100 hover:bg-green-700 transition">수정 완료</button>
-                    <button onclick="hideSettings()" class="w-full py-2 text-gray-400 text-sm font-medium">취소하고 돌아가기</button>
-                </div>
+                <input type="text" id="newId" placeholder="새 아이디" class="w-full p-4 bg-gray-100 border-none rounded-2xl">
+                <input type="password" id="newPw" placeholder="새 비밀번호" class="w-full p-4 bg-gray-100 border-none rounded-2xl">
+                <button onclick="updateProfile()" class="w-full py-4 bg-green-600 text-white font-bold rounded-2xl">수정 완료</button>
+                <button onclick="hideSettings()" class="w-full py-2 text-gray-400 text-sm">취소하고 돌아가기</button>
             </div>
         </div>
     </div>
 
     <script>
-        // 사용자가 제공한 URL 적용
         const GAS_URL = "https://script.google.com/macros/s/AKfycbwGE8D9_eLe1_XOqAKa1bbDBxp4VwxWsD9p4sGWvPIe0Zv4SfSdAdeB2MVmLLyqcFbT1g/exec"; 
 
         let isSignup = false;
         let currentUser = localStorage.getItem("chat_user") || null;
 
-        // 초기 접속 상태 확인
         if(currentUser) showMain();
 
-        function toggleAuth() {
-            isSignup = !isSignup;
-            document.getElementById("authTitle").innerText = isSignup ? "회원가입" : "로그인";
-            document.getElementById("authSub").innerText = isSignup ? "새로운 계정을 생성하세요." : "서비스를 시작하려면 정보를 입력하세요.";
-            document.getElementById("mainBtn").innerText = isSignup ? "가입 완료하기" : "로그인";
-            document.getElementById("subBtn").innerText = isSignup ? "이미 계정이 있나요? 로그인" : "계정이 없으신가요? 회원가입";
-        }
-
-        async function apiCall(data) {
-            document.getElementById("loader").classList.remove("hidden");
+        // [핵심 변경] showLoader 인자를 추가하여 선택적으로 로딩 표시를 제어합니다.
+        async function apiCall(data, showLoader = true) {
+            if(showLoader) document.getElementById("loader").classList.remove("hidden");
             try {
                 const res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(data) });
                 const json = await res.json();
-                document.getElementById("loader").classList.add("hidden");
+                if(showLoader) document.getElementById("loader").classList.add("hidden");
                 return json;
             } catch (e) {
-                document.getElementById("loader").classList.add("hidden");
-                alert("서버 연결 실패! GAS 배포 설정을 확인하세요.");
+                if(showLoader) document.getElementById("loader").classList.add("hidden");
                 console.error(e);
             }
         }
@@ -121,55 +94,44 @@
         async function handleAuth() {
             const id = document.getElementById("id").value;
             const pw = document.getElementById("pw").value;
-            if(!id || !pw) return alert("아이디와 비밀번호를 입력해주세요.");
-
-            const action = isSignup ? "signup" : "login";
-            const response = await apiCall({ action, id, pw });
-
+            if(!id || !pw) return alert("입력해주세요.");
+            const response = await apiCall({ action: isSignup ? "signup" : "login", id, pw });
             if(response.result === "success") {
-                if(isSignup) {
-                    alert("🎉 회원가입이 완료되었습니다! 로그인해주세요.");
-                    toggleAuth();
-                } else {
-                    alert("✅ 로그인에 성공했습니다.");
-                    currentUser = id;
-                    localStorage.setItem("chat_user", id);
-                    showMain();
-                }
-            } else if(response.result === "exists") {
-                alert("❌ 이미 존재하는 아이디입니다.");
-            } else {
-                alert("❌ 로그인 정보를 확인하세요.");
-            }
+                if(isSignup) { alert("가입 완료!"); toggleAuth(); }
+                else { currentUser = id; localStorage.setItem("chat_user", id); showMain(); }
+            } else { alert("실패했습니다."); }
         }
 
         function showMain() {
             document.getElementById("authView").classList.add("hidden");
             document.getElementById("mainView").classList.remove("hidden");
             document.getElementById("displayId").innerText = currentUser;
-            loadChats();
-            setInterval(loadChats, 4000); // 4초마다 자동 갱신
+            loadChats(true); // 처음엔 로딩창 보여줌
+            setInterval(() => loadChats(false), 4000); // 이후엔 로딩창 없이 갱신
         }
 
         async function sendChat() {
             const input = document.getElementById("chatInput");
             const msg = input.value;
             if(!msg) return;
-            
-            input.value = ""; // 즉시 비우기
-            const res = await apiCall({ action: "sendChat", id: currentUser, msg: msg });
-            if(res.result === "success") loadChats();
+            input.value = "";
+            // 전송 시에도 굳이 로딩창이 뜰 필요 없으므로 false 처리 (더 빠른 체감 속도)
+            await apiCall({ action: "sendChat", id: currentUser, msg: msg }, false);
+            loadChats(false);
         }
 
-        async function loadChats() {
-            const data = await apiCall({ action: "getChat" });
+        // [핵심 변경] isInitial 인자에 따라 로딩 표시 여부 결정
+        async function loadChats(isInitial = false) {
+            const data = await apiCall({ action: "getChat" }, isInitial);
             if(!data || !data.messages) return;
             
             const box = document.getElementById("chatBox");
+            const isAtBottom = box.scrollHeight - box.scrollTop <= box.clientHeight + 100;
+
             box.innerHTML = data.messages.map(m => {
                 const isMe = m.id === currentUser;
                 return `
-                    <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}">
+                    <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} animate-fade-in">
                         <span class="text-[10px] text-gray-400 mb-1 px-1">${m.id}</span>
                         <div class="chat-bubble ${isMe ? 'my-msg shadow-md' : 'other-msg shadow-sm'}">
                             ${m.msg}
@@ -177,13 +139,22 @@
                     </div>
                 `;
             }).join('');
-            box.scrollTop = box.scrollHeight;
+            
+            // 처음 접속했거나, 사용자가 이미 아래쪽에 있을 때만 스크롤을 끝으로 내림
+            if(isInitial || isAtBottom) {
+                box.scrollTop = box.scrollHeight;
+            }
+        }
+
+        function toggleAuth() {
+            isSignup = !isSignup;
+            document.getElementById("authTitle").innerText = isSignup ? "회원가입" : "로그인";
+            document.getElementById("mainBtn").innerText = isSignup ? "가입 완료하기" : "로그인";
         }
 
         function showSettings() {
             document.getElementById("chatSection").classList.add("hidden");
             document.getElementById("settingsSection").classList.remove("hidden");
-            document.getElementById("newId").value = currentUser;
         }
 
         function hideSettings() {
@@ -194,15 +165,8 @@
         async function updateProfile() {
             const newId = document.getElementById("newId").value;
             const newPw = document.getElementById("newPw").value;
-            if(!newId || !newPw) return alert("변경할 아이디와 비밀번호를 입력하세요.");
-
             const res = await apiCall({ action: "update", oldId: currentUser, newId, newPw });
-            if(res.result === "success") {
-                alert("🚀 정보가 성공적으로 변경되었습니다. 보안을 위해 다시 로그인해주세요.");
-                logout();
-            } else {
-                alert("정보 수정에 실패했습니다.");
-            }
+            if(res.result === "success") { alert("수정 완료! 다시 로그인하세요."); logout(); }
         }
 
         function logout() {
