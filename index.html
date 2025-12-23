@@ -2,84 +2,144 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>종합 웹 시스템</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스프레드시트 스마트 시스템</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: sans-serif; background: #f4f7f6; display: flex; justify-content: center; padding: 20px; }
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); width: 400px; }
-        .hidden { display: none; }
-        input { width: 100%; padding: 10px; margin: 5px 0; box-sizing: border-box; }
-        button { width: 100%; padding: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin: 5px 0; }
-        button.secondary { background: #6c757d; }
-        #chatBox { height: 300px; border: 1px solid #ddd; overflow-y: auto; padding: 10px; margin-bottom: 10px; background: #fafafa; }
-        .msg-item { margin-bottom: 8px; font-size: 0.9em; }
-        .msg-id { font-weight: bold; color: #007bff; }
-        .nav { text-align: right; font-size: 0.8em; margin-bottom: 10px; }
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700&display=swap');
+        body { font-family: 'Pretendard', sans-serif; background: linear-gradient(135deg, #e0e7ff, #f3f4f6); }
+        .chat-bubble { max-width: 80%; border-radius: 18px; padding: 10px 16px; font-size: 14px; position: relative; }
+        .my-msg { background-color: #3b82f6; color: white; border-bottom-right-radius: 4px; }
+        .other-msg { background-color: white; color: #1f2937; border-bottom-left-radius: 4px; border: 1px solid #e5e7eb; }
+        .loading-overlay { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(4px); }
     </style>
 </head>
-<body>
+<body class="flex items-center justify-center min-h-screen p-4">
 
-    <div class="card">
-        <div id="authView">
-            <h2 id="authTitle">로그인</h2>
-            <input type="text" id="id" placeholder="아이디">
-            <input type="password" id="pw" placeholder="비밀번호">
-            <button onclick="handleAuth()" id="mainBtn">로그인</button>
-            <button onclick="toggleAuth()" class="secondary" id="subBtn">회원가입하러 가기</button>
+    <div id="loader" class="hidden fixed inset-0 z-50 flex items-center justify-center loading-overlay">
+        <div class="flex flex-col items-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-4 border-blue-600"></div>
+            <p class="mt-4 font-semibold text-blue-600">데이터 처리 중...</p>
+        </div>
+    </div>
+
+    <div id="app" class="w-full max-w-md bg-white rounded-[2rem] shadow-2xl overflow-hidden border border-white/20">
+        
+        <div id="authView" class="p-10">
+            <div class="text-center mb-8">
+                <h1 id="authTitle" class="text-3xl font-bold text-gray-800">로그인</h1>
+                <p id="authSub" class="text-gray-400 mt-2 text-sm font-medium">서비스를 시작하려면 정보를 입력하세요.</p>
+            </div>
+            
+            <div class="space-y-4">
+                <div class="relative">
+                    <input type="text" id="id" placeholder="아이디" class="w-full p-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-400 outline-none transition-all">
+                </div>
+                <div class="relative">
+                    <input type="password" id="pw" placeholder="비밀번호" class="w-full p-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-400 outline-none transition-all">
+                </div>
+                <button onclick="handleAuth()" id="mainBtn" class="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl transition-all transform active:scale-95 shadow-lg shadow-blue-200">
+                    로그인
+                </button>
+                <button onclick="toggleAuth()" id="subBtn" class="w-full py-4 text-blue-600 font-semibold hover:bg-blue-50 rounded-2xl transition-all">
+                    계정이 없으신가요? 회원가입
+                </button>
+            </div>
         </div>
 
-        <div id="mainView" class="hidden">
-            <div class="nav">접속중: <span id="displayId"></span> | <a href="#" onclick="showSettings()">정보수정</a> | <a href="#" onclick="logout()">로그아웃</a></div>
-            
-            <div id="chatSection">
-                <h3>공용 채팅방</h3>
-                <div id="chatBox"></div>
-                <input type="text" id="chatInput" placeholder="메시지를 입력하세요..." onkeypress="if(event.keyCode==13) sendChat()">
-                <button onclick="sendChat()">전송</button>
+        <div id="mainView" class="hidden flex flex-col h-[650px]">
+            <div class="p-6 bg-white border-b flex justify-between items-center">
+                <div>
+                    <span class="text-[10px] font-bold text-blue-500 uppercase tracking-wider">Online</span>
+                    <h2 id="displayId" class="text-lg font-bold text-gray-800 leading-tight">User</h2>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="showSettings()" class="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-full hover:bg-gray-200 transition">⚙️</button>
+                    <button onclick="logout()" class="text-xs font-bold text-red-500 bg-red-50 px-3 py-2 rounded-xl hover:bg-red-100">로그아웃</button>
+                </div>
             </div>
 
-            <div id="settingsSection" class="hidden">
-                <h3>내 정보 수정</h3>
-                <input type="text" id="newId" placeholder="새 아이디">
-                <input type="password" id="newPw" placeholder="새 비밀번호">
-                <button onclick="updateProfile()">수정 완료</button>
-                <button onclick="hideSettings()" class="secondary">취소</button>
+            <div id="chatSection" class="flex-1 flex flex-col overflow-hidden bg-slate-50">
+                <div id="chatBox" class="flex-1 p-6 overflow-y-auto space-y-4 flex flex-col">
+                    </div>
+                <div class="p-4 bg-white flex gap-2 border-t">
+                    <input type="text" id="chatInput" placeholder="메시지를 입력하세요..." class="flex-1 p-3 bg-gray-100 border-none rounded-xl focus:ring-2 focus:ring-blue-400 outline-none transition" onkeypress="if(event.keyCode==13) sendChat()">
+                    <button onclick="sendChat()" class="bg-blue-600 text-white px-5 py-3 rounded-xl font-bold hover:bg-blue-700 transition">전송</button>
+                </div>
+            </div>
+
+            <div id="settingsSection" class="hidden p-8 flex-1 space-y-5 animate-fade-in">
+                <h3 class="text-xl font-bold text-gray-800 mb-2">회원 정보 수정</h3>
+                <div class="space-y-4">
+                    <label class="block">
+                        <span class="text-sm font-medium text-gray-500 ml-1">새 아이디</span>
+                        <input type="text" id="newId" class="w-full mt-1 p-4 bg-gray-100 border-none rounded-2xl outline-none focus:ring-2 focus:ring-green-400">
+                    </label>
+                    <label class="block">
+                        <span class="text-sm font-medium text-gray-500 ml-1">새 비밀번호</span>
+                        <input type="password" id="newPw" class="w-full mt-1 p-4 bg-gray-100 border-none rounded-2xl outline-none focus:ring-2 focus:ring-green-400">
+                    </label>
+                    <button onclick="updateProfile()" class="w-full py-4 bg-green-600 text-white font-bold rounded-2xl shadow-lg shadow-green-100 hover:bg-green-700 transition">수정 완료</button>
+                    <button onclick="hideSettings()" class="w-full py-2 text-gray-400 text-sm font-medium">취소하고 돌아가기</button>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbx-gXkA6uHw30hDgLs2ce-2h6ctul4nF8inVpq5JcWaLF8v52-DEXd0qn7N55YtzI4gLw/exec";
+        // 사용자가 제공한 URL 적용
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbwGE8D9_eLe1_XOqAKa1bbDBxp4VwxWsD9p4sGWvPIe0Zv4SfSdAdeB2MVmLLyqcFbT1g/exec"; 
+
         let isSignup = false;
         let currentUser = localStorage.getItem("chat_user") || null;
 
-        // 초기 화면 설정
+        // 초기 접속 상태 확인
         if(currentUser) showMain();
 
         function toggleAuth() {
             isSignup = !isSignup;
             document.getElementById("authTitle").innerText = isSignup ? "회원가입" : "로그인";
-            document.getElementById("mainBtn").innerText = isSignup ? "가입하기" : "로그인";
-            document.getElementById("subBtn").innerText = isSignup ? "로그인하러 가기" : "회원가입하러 가기";
+            document.getElementById("authSub").innerText = isSignup ? "새로운 계정을 생성하세요." : "서비스를 시작하려면 정보를 입력하세요.";
+            document.getElementById("mainBtn").innerText = isSignup ? "가입 완료하기" : "로그인";
+            document.getElementById("subBtn").innerText = isSignup ? "이미 계정이 있나요? 로그인" : "계정이 없으신가요? 회원가입";
         }
 
-        async function api(data) {
-            const res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(data) });
-            return await res.json();
+        async function apiCall(data) {
+            document.getElementById("loader").classList.remove("hidden");
+            try {
+                const res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(data) });
+                const json = await res.json();
+                document.getElementById("loader").classList.add("hidden");
+                return json;
+            } catch (e) {
+                document.getElementById("loader").classList.add("hidden");
+                alert("서버 연결 실패! GAS 배포 설정을 확인하세요.");
+                console.error(e);
+            }
         }
 
         async function handleAuth() {
             const id = document.getElementById("id").value;
             const pw = document.getElementById("pw").value;
-            if(!id || !pw) return alert("입력해주세요.");
+            if(!id || !pw) return alert("아이디와 비밀번호를 입력해주세요.");
 
             const action = isSignup ? "signup" : "login";
-            const data = await api({ action, id, pw });
+            const response = await apiCall({ action, id, pw });
 
-            if(data.result === "success") {
-                if(isSignup) { alert("가입 완료! 로그인해주세요."); toggleAuth(); }
-                else { currentUser = id; localStorage.setItem("chat_user", id); showMain(); }
+            if(response.result === "success") {
+                if(isSignup) {
+                    alert("🎉 회원가입이 완료되었습니다! 로그인해주세요.");
+                    toggleAuth();
+                } else {
+                    alert("✅ 로그인에 성공했습니다.");
+                    currentUser = id;
+                    localStorage.setItem("chat_user", id);
+                    showMain();
+                }
+            } else if(response.result === "exists") {
+                alert("❌ 이미 존재하는 아이디입니다.");
             } else {
-                alert(data.result === "exists" ? "이미 존재하는 ID입니다." : "정보가 일치하지 않습니다.");
+                alert("❌ 로그인 정보를 확인하세요.");
             }
         }
 
@@ -88,23 +148,35 @@
             document.getElementById("mainView").classList.remove("hidden");
             document.getElementById("displayId").innerText = currentUser;
             loadChats();
-            setInterval(loadChats, 3000); // 3초마다 채팅 갱신
+            setInterval(loadChats, 4000); // 4초마다 자동 갱신
         }
 
         async function sendChat() {
-            const msg = document.getElementById("chatInput").value;
+            const input = document.getElementById("chatInput");
+            const msg = input.value;
             if(!msg) return;
-            await api({ action: "sendChat", id: currentUser, msg: msg });
-            document.getElementById("chatInput").value = "";
-            loadChats();
+            
+            input.value = ""; // 즉시 비우기
+            const res = await apiCall({ action: "sendChat", id: currentUser, msg: msg });
+            if(res.result === "success") loadChats();
         }
 
         async function loadChats() {
-            const data = await api({ action: "getChat" });
+            const data = await apiCall({ action: "getChat" });
+            if(!data || !data.messages) return;
+            
             const box = document.getElementById("chatBox");
-            box.innerHTML = data.messages.map(m => `
-                <div class="msg-item"><span class="msg-id">${m.id}:</span> ${m.msg}</div>
-            `).join('');
+            box.innerHTML = data.messages.map(m => {
+                const isMe = m.id === currentUser;
+                return `
+                    <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}">
+                        <span class="text-[10px] text-gray-400 mb-1 px-1">${m.id}</span>
+                        <div class="chat-bubble ${isMe ? 'my-msg shadow-md' : 'other-msg shadow-sm'}">
+                            ${m.msg}
+                        </div>
+                    </div>
+                `;
+            }).join('');
             box.scrollTop = box.scrollHeight;
         }
 
@@ -122,10 +194,14 @@
         async function updateProfile() {
             const newId = document.getElementById("newId").value;
             const newPw = document.getElementById("newPw").value;
-            const data = await api({ action: "update", oldId: currentUser, newId, newPw });
-            if(data.result === "success") {
-                alert("수정되었습니다. 다시 로그인해주세요.");
+            if(!newId || !newPw) return alert("변경할 아이디와 비밀번호를 입력하세요.");
+
+            const res = await apiCall({ action: "update", oldId: currentUser, newId, newPw });
+            if(res.result === "success") {
+                alert("🚀 정보가 성공적으로 변경되었습니다. 보안을 위해 다시 로그인해주세요.");
                 logout();
+            } else {
+                alert("정보 수정에 실패했습니다.");
             }
         }
 
